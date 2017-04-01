@@ -22,9 +22,12 @@
     </properties>
 
     <scm>
-        <connection>scm:git:git@github.com:${github.account}/game-of-life.git</connection>
-        <developerConnection>scm:git:git@github.com:${github.account}/game-of-life.git</developerConnection>
-        <url>scm:git:git@github.com:${github.account}/game-of-life.git</url>
+	
+
+		<!--https://syam_bitbucket@bitbucket.org/syam_bitbucket/game_maven.git-->
+        <connection>scm:git:https://syam_bitbucket@bitbucket.org/syam_bitbucket/game_maven.git</connection>
+        <developerConnection>scm:git:https://syam_bitbucket@bitbucket.org/syam_bitbucket/game_maven.git</developerConnection>
+        <url>scm:git:https://syam_bitbucket@bitbucket.org/syam_bitbucket/game_maven.git</url>
     </scm>
 	
 	<!-- This section is used for upload artifacts to releases and snapshot repositries  ######  BY SHYAM  ######  -->
@@ -34,6 +37,8 @@
 				<url>http://localhost:8081/nexus/content/repositories/releases</url>
 		</repository>
 		
+		
+
 		<snapshotRepository>
 			<id>snapshots</id>
 				<url>http://localhost:8081/nexus/content/repositories/snapshots</url>
