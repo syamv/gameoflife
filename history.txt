@@ -1,0 +1,500 @@
+    4  docker ps -a
+    5  exit
+    6  #!/bin/bash
+    7  trap '[ "$?" -eq 0 ] || read -p "Looks like something went wrong in step ´$STEP´... Press any key to continue..."' EXIT
+    8  # TODO: I'm sure this is not very robust.  But, it is needed for now to ensure
+    9  # that binaries provided by Docker Toolbox over-ride binaries provided by
+   10  # Docker for Windows when launching using the Quickstart.
+   11  export PATH="/c/Program Files/Docker Toolbox:$PATH"
+   12  VM=${DOCKER_MACHINE_NAME-default}
+   13  DOCKER_MACHINE=./docker-machine.exe
+   14  STEP="Looking for vboxmanage.exe"
+   15  if [ ! -z "$VBOX_MSI_INSTALL_PATH" ]; then   VBOXMANAGE="${VBOX_MSI_INSTALL_PATH}VBoxManage.exe"; else   VBOXMANAGE="${VBOX_INSTALL_PATH}VBoxManage.exe"; fi
+   16  BLUE='\033[1;34m'
+   17  GREEN='\033[0;32m'
+   18  NC='\033[0m'
+   19  #clear all_proxy if not socks address
+   20  if  [[ $ALL_PROXY != socks* ]]; then   unset ALL_PROXY; fi
+   21  if  [[ $all_proxy != socks* ]]; then   unset all_proxy; fi
+   22  if [ ! -f "${DOCKER_MACHINE}" ]; then   echo "Docker Machine is not installed. Please re-run the Toolbox Installer and try again.";   exit 1; fi
+   23  if [ ! -f "${VBOXMANAGE}" ]; then   echo "VirtualBox is not installed. Please re-run the Toolbox Installer and try again.";   exit 1; fi
+   24  "${VBOXMANAGE}" list vms | grep \""${VM}"\" &> /dev/null
+   25  VM_EXISTS_CODE=$?
+   26  set -e
+   27  STEP="Checking if machine $VM exists"
+   28  if [ $VM_EXISTS_CODE -eq 1 ]; then   "${DOCKER_MACHINE}" rm -f "${VM}" &> /dev/null || :;   rm -rf ~/.docker/machine/machines/"${VM}"   if [ "${HTTP_PROXY}" ]; then     PROXY_ENV="$PROXY_ENV --engine-env HTTP_PROXY=$HTTP_PROXY";   fi;   if [ "${HTTPS_PROXY}" ]; then     PROXY_ENV="$PROXY_ENV --engine-env HTTPS_PROXY=$HTTPS_PROXY";   fi;   if [ "${NO_PROXY}" ]; then     PROXY_ENV="$PROXY_ENV --engine-env NO_PROXY=$NO_PROXY";   fi;   "${DOCKER_MACHINE}" create -d virtualbox $PROXY_ENV "${VM}"; fi
+   29  STEP="Checking status on $VM"
+   30  VM_STATUS="$(${DOCKER_MACHINE} status ${VM} 2>&1)"
+   31  if [ "${VM_STATUS}" != "Running" ]; then   "${DOCKER_MACHINE}" start "${VM}";   yes | "${DOCKER_MACHINE}" regenerate-certs "${VM}"; fi
+   32  STEP="Setting env"
+   33  eval "$(${DOCKER_MACHINE} env --shell=bash --no-proxy ${VM})"
+   34  STEP="Finalize"
+   35  clear
+   36  cat << EOF
+   37                          ##         .
+   38                    ## ## ##        ==
+   39                 ## ## ## ## ##    ===
+   40             /"""""""""""""""""\___/ ===
+   41        ~~~ {~~ ~~~~ ~~~ ~~~~ ~~~ ~ /  ===- ~~~
+   42             \______ o           __/
+   43               \    \         __/
+   44                \____\_______/
+   45  EOF
+   46  echo -e "${BLUE}docker${NC} is configured to use the ${GREEN}${VM}${NC} machine with IP ${GREEN}$(${DOCKER_MACHINE} ip ${VM})${NC}"
+   47  echo "For help getting started, check out the docs at https://docs.docker.com"
+   48  echo
+   49  cd
+   50  docker () {   MSYS_NO_PATHCONV=1 docker.exe "$@"; }
+   51  export -f docker
+   52  if [ $# -eq 0 ]; then   echo "Start interactive shell";   exec "$BASH" --login -i; else   echo "Start shell with command";   exec "$BASH" -c "$*"; fi
+   53  #!/bin/bash
+   54  trap '[ "$?" -eq 0 ] || read -p "Looks like something went wrong in step ´$STEP´... Press any key to continue..."' EXIT
+   55  # TODO: I'm sure this is not very robust.  But, it is needed for now to ensure
+   56  # that binaries provided by Docker Toolbox over-ride binaries provided by
+   57  # Docker for Windows when launching using the Quickstart.
+   58  export PATH="/c/Program Files/Docker Toolbox:$PATH"
+   59  VM=${DOCKER_MACHINE_NAME-default}
+   60  DOCKER_MACHINE=./docker-machine.exe
+   61  STEP="Looking for vboxmanage.exe"
+   62  if [ ! -z "$VBOX_MSI_INSTALL_PATH" ]; then   VBOXMANAGE="${VBOX_MSI_INSTALL_PATH}VBoxManage.exe"; else   VBOXMANAGE="${VBOX_INSTALL_PATH}VBoxManage.exe"; fi
+   63  BLUE='\033[1;34m'
+   64  GREEN='\033[0;32m'
+   65  NC='\033[0m'
+   66  #clear all_proxy if not socks address
+   67  if  [[ $ALL_PROXY != socks* ]]; then   unset ALL_PROXY; fi
+   68  if  [[ $all_proxy != socks* ]]; then   unset all_proxy; fi
+   69  if [ ! -f "${DOCKER_MACHINE}" ]; then   echo "Docker Machine is not installed. Please re-run the Toolbox Installer and try again.";   exit 1; fi
+   70  if [ ! -f "${VBOXMANAGE}" ]; then   echo "VirtualBox is not installed. Please re-run the Toolbox Installer and try again.";   exit 1; fi
+   71  "${VBOXMANAGE}" list vms | grep \""${VM}"\" &> /dev/null
+   72  VM_EXISTS_CODE=$?
+   73  set -e
+   74  STEP="Checking if machine $VM exists"
+   75  if [ $VM_EXISTS_CODE -eq 1 ]; then   "${DOCKER_MACHINE}" rm -f "${VM}" &> /dev/null || :;   rm -rf ~/.docker/machine/machines/"${VM}"   if [ "${HTTP_PROXY}" ]; then     PROXY_ENV="$PROXY_ENV --engine-env HTTP_PROXY=$HTTP_PROXY";   fi;   if [ "${HTTPS_PROXY}" ]; then     PROXY_ENV="$PROXY_ENV --engine-env HTTPS_PROXY=$HTTPS_PROXY";   fi;   if [ "${NO_PROXY}" ]; then     PROXY_ENV="$PROXY_ENV --engine-env NO_PROXY=$NO_PROXY";   fi;   "${DOCKER_MACHINE}" create -d virtualbox $PROXY_ENV "${VM}"; fi
+   76  STEP="Checking status on $VM"
+   77  VM_STATUS="$(${DOCKER_MACHINE} status ${VM} 2>&1)"
+   78  if [ "${VM_STATUS}" != "Running" ]; then   "${DOCKER_MACHINE}" start "${VM}";   yes | "${DOCKER_MACHINE}" regenerate-certs "${VM}"; fi
+   79  STEP="Setting env"
+   80  eval "$(${DOCKER_MACHINE} env --shell=bash --no-proxy ${VM})"
+   81  STEP="Finalize"
+   82  clear
+   83  cat << EOF
+   84                          ##         .
+   85                    ## ## ##        ==
+   86                 ## ## ## ## ##    ===
+   87             /"""""""""""""""""\___/ ===
+   88        ~~~ {~~ ~~~~ ~~~ ~~~~ ~~~ ~ /  ===- ~~~
+   89             \______ o           __/
+   90               \    \         __/
+   91                \____\_______/
+   92  EOF
+   93  echo -e "${BLUE}docker${NC} is configured to use the ${GREEN}${VM}${NC} machine with IP ${GREEN}$(${DOCKER_MACHINE} ip ${VM})${NC}"
+   94  echo "For help getting started, check out the docs at https://docs.docker.com"
+   95  echo
+   96  cd
+   97  docker () {   MSYS_NO_PATHCONV=1 docker.exe "$@"; }
+   98  export -f docker
+   99  if [ $# -eq 0 ]; then   echo "Start interactive shell";   exec "$BASH" --login -i; else   echo "Start shell with command";   exec "$BASH" -c "$*"; fi
+  100  vagrant up
+  101  vagrant up
+  102  vagrant up
+  103  vagrant up
+  104  vagrant up
+  105  vagrant up --provision
+  106  vagrant up --provision
+  107  vagrant up --provision
+  108  vagrant up --provision
+  109  vagrant ssh
+  110  exit
+  111  docker images
+  112  docker ps -a
+  113  docker ps 
+  114  docker excec -i a736fb948bf5
+  115  docker start -i a736fb948bf5
+  116  docker inspect a736fb948bf5
+  117  docker inspect a736fb948bf5 > docker.test
+  118  ls
+  119  pwd
+  120   a736fb948bf5
+  121  docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' container_name_or_id   a736fb948bf5
+  122  docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' a736fb948bf5
+  123  docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' a736fb948bf5
+  124  docker inspect -f '{{NetworkSettings.Networks}}{{.IPAddress}}{{end}}' a736fb948bf5
+  125  docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' a736fb948bf5
+  126  docker exec a736fb948bf5 cat /etc/hosts 
+  127  docker exec -i a736fb948bf5 cat /etc/hosts 
+  128  docker exec start a736fb948bf5 cat /etc/hosts 
+  129  docker start a736fb948bf5 
+  130  docker exec a736fb948bf5 cat /etc/hosts 
+  131  docker network inspect bridge
+  132  docker network inspect bridge > bridge.txt
+  133  ls
+  134  pwd
+  135  ls
+  136  docker network inspect
+  137  docker network ls
+  138  docker network connect
+  139  exit
+  140  vagrant up
+  141  vagrant up
+  142  vagrant up
+  143  vagrant --provision
+  144  vagrant reload
+  145  vagrant ssh
+  146  exit
+  147  #!/bin/bash
+  148  trap '[ "$?" -eq 0 ] || read -p "Looks like something went wrong in step ´$STEP´... Press any key to continue..."' EXIT
+  149  # TODO: I'm sure this is not very robust.  But, it is needed for now to ensure
+  150  # that binaries provided by Docker Toolbox over-ride binaries provided by
+  151  # Docker for Windows when launching using the Quickstart.
+  152  export PATH="/c/Program Files/Docker Toolbox:$PATH"
+  153  VM=${DOCKER_MACHINE_NAME-default}
+  154  DOCKER_MACHINE=./docker-machine.exe
+  155  STEP="Looking for vboxmanage.exe"
+  156  if [ ! -z "$VBOX_MSI_INSTALL_PATH" ]; then   VBOXMANAGE="${VBOX_MSI_INSTALL_PATH}VBoxManage.exe"; else   VBOXMANAGE="${VBOX_INSTALL_PATH}VBoxManage.exe"; fi
+  157  BLUE='\033[1;34m'
+  158  GREEN='\033[0;32m'
+  159  NC='\033[0m'
+  160  #clear all_proxy if not socks address
+  161  if  [[ $ALL_PROXY != socks* ]]; then   unset ALL_PROXY; fi
+  162  if  [[ $all_proxy != socks* ]]; then   unset all_proxy; fi
+  163  if [ ! -f "${DOCKER_MACHINE}" ]; then   echo "Docker Machine is not installed. Please re-run the Toolbox Installer and try again.";   exit 1; fi
+  164  if [ ! -f "${VBOXMANAGE}" ]; then   echo "VirtualBox is not installed. Please re-run the Toolbox Installer and try again.";   exit 1; fi
+  165  "${VBOXMANAGE}" list vms | grep \""${VM}"\" &> /dev/null
+  166  VM_EXISTS_CODE=$?
+  167  set -e
+  168  STEP="Checking if machine $VM exists"
+  169  if [ $VM_EXISTS_CODE -eq 1 ]; then   "${DOCKER_MACHINE}" rm -f "${VM}" &> /dev/null || :;   rm -rf ~/.docker/machine/machines/"${VM}"   if [ "${HTTP_PROXY}" ]; then     PROXY_ENV="$PROXY_ENV --engine-env HTTP_PROXY=$HTTP_PROXY";   fi;   if [ "${HTTPS_PROXY}" ]; then     PROXY_ENV="$PROXY_ENV --engine-env HTTPS_PROXY=$HTTPS_PROXY";   fi;   if [ "${NO_PROXY}" ]; then     PROXY_ENV="$PROXY_ENV --engine-env NO_PROXY=$NO_PROXY";   fi;   "${DOCKER_MACHINE}" create -d virtualbox $PROXY_ENV "${VM}"; fi
+  170  STEP="Checking status on $VM"
+  171  VM_STATUS="$(${DOCKER_MACHINE} status ${VM} 2>&1)"
+  172  if [ "${VM_STATUS}" != "Running" ]; then   "${DOCKER_MACHINE}" start "${VM}";   yes | "${DOCKER_MACHINE}" regenerate-certs "${VM}"; fi
+  173  STEP="Setting env"
+  174  eval "$(${DOCKER_MACHINE} env --shell=bash --no-proxy ${VM})"
+  175  STEP="Finalize"
+  176  clear
+  177  cat << EOF
+  178                          ##         .
+  179                    ## ## ##        ==
+  180                 ## ## ## ## ##    ===
+  181             /"""""""""""""""""\___/ ===
+  182        ~~~ {~~ ~~~~ ~~~ ~~~~ ~~~ ~ /  ===- ~~~
+  183             \______ o           __/
+  184               \    \         __/
+  185                \____\_______/
+  186  EOF
+  187  echo -e "${BLUE}docker${NC} is configured to use the ${GREEN}${VM}${NC} machine with IP ${GREEN}$(${DOCKER_MACHINE} ip ${VM})${NC}"
+  188  echo "For help getting started, check out the docs at https://docs.docker.com"
+  189  echo
+  190  cd
+  191  docker () {   MSYS_NO_PATHCONV=1 docker.exe "$@"; }
+  192  export -f docker
+  193  if [ $# -eq 0 ]; then   echo "Start interactive shell";   exec "$BASH" --login -i; else   echo "Start shell with command";   exec "$BASH" -c "$*"; fi
+  194  vagrant up
+  195  vagrant up
+  196  vagrant ssh
+  197  vagrant reload
+  198  vagrant up
+  199  #!/bin/bash
+  200  trap '[ "$?" -eq 0 ] || read -p "Looks like something went wrong in step ´$STEP´... Press any key to continue..."' EXIT
+  201  # TODO: I'm sure this is not very robust.  But, it is needed for now to ensure
+  202  # that binaries provided by Docker Toolbox over-ride binaries provided by
+  203  # Docker for Windows when launching using the Quickstart.
+  204  export PATH="/c/Program Files/Docker Toolbox:$PATH"
+  205  VM=${DOCKER_MACHINE_NAME-default}
+  206  DOCKER_MACHINE=./docker-machine.exe
+  207  STEP="Looking for vboxmanage.exe"
+  208  if [ ! -z "$VBOX_MSI_INSTALL_PATH" ]; then   VBOXMANAGE="${VBOX_MSI_INSTALL_PATH}VBoxManage.exe"; else   VBOXMANAGE="${VBOX_INSTALL_PATH}VBoxManage.exe"; fi
+  209  BLUE='\033[1;34m'
+  210  GREEN='\033[0;32m'
+  211  NC='\033[0m'
+  212  #clear all_proxy if not socks address
+  213  if  [[ $ALL_PROXY != socks* ]]; then   unset ALL_PROXY; fi
+  214  if  [[ $all_proxy != socks* ]]; then   unset all_proxy; fi
+  215  if [ ! -f "${DOCKER_MACHINE}" ]; then   echo "Docker Machine is not installed. Please re-run the Toolbox Installer and try again.";   exit 1; fi
+  216  if [ ! -f "${VBOXMANAGE}" ]; then   echo "VirtualBox is not installed. Please re-run the Toolbox Installer and try again.";   exit 1; fi
+  217  "${VBOXMANAGE}" list vms | grep \""${VM}"\" &> /dev/null
+  218  VM_EXISTS_CODE=$?
+  219  set -e
+  220  STEP="Checking if machine $VM exists"
+  221  if [ $VM_EXISTS_CODE -eq 1 ]; then   "${DOCKER_MACHINE}" rm -f "${VM}" &> /dev/null || :;   rm -rf ~/.docker/machine/machines/"${VM}"   if [ "${HTTP_PROXY}" ]; then     PROXY_ENV="$PROXY_ENV --engine-env HTTP_PROXY=$HTTP_PROXY";   fi;   if [ "${HTTPS_PROXY}" ]; then     PROXY_ENV="$PROXY_ENV --engine-env HTTPS_PROXY=$HTTPS_PROXY";   fi;   if [ "${NO_PROXY}" ]; then     PROXY_ENV="$PROXY_ENV --engine-env NO_PROXY=$NO_PROXY";   fi;   "${DOCKER_MACHINE}" create -d virtualbox $PROXY_ENV "${VM}"; fi
+  222  STEP="Checking status on $VM"
+  223  VM_STATUS="$(${DOCKER_MACHINE} status ${VM} 2>&1)"
+  224  if [ "${VM_STATUS}" != "Running" ]; then   "${DOCKER_MACHINE}" start "${VM}";   yes | "${DOCKER_MACHINE}" regenerate-certs "${VM}"; fi
+  225  STEP="Setting env"
+  226  eval "$(${DOCKER_MACHINE} env --shell=bash --no-proxy ${VM})"
+  227  STEP="Finalize"
+  228  clear
+  229  cat << EOF
+  230                          ##         .
+  231                    ## ## ##        ==
+  232                 ## ## ## ## ##    ===
+  233             /"""""""""""""""""\___/ ===
+  234        ~~~ {~~ ~~~~ ~~~ ~~~~ ~~~ ~ /  ===- ~~~
+  235             \______ o           __/
+  236               \    \         __/
+  237                \____\_______/
+  238  EOF
+  239  echo -e "${BLUE}docker${NC} is configured to use the ${GREEN}${VM}${NC} machine with IP ${GREEN}$(${DOCKER_MACHINE} ip ${VM})${NC}"
+  240  echo "For help getting started, check out the docs at https://docs.docker.com"
+  241  echo
+  242  cd
+  243  docker () {   MSYS_NO_PATHCONV=1 docker.exe "$@"; }
+  244  export -f docker
+  245  if [ $# -eq 0 ]; then   echo "Start interactive shell";   exec "$BASH" --login -i; else   echo "Start shell with command";   exec "$BASH" -c "$*"; fi
+  246  docker-machine ls
+  247  docker run --name tomcat01 -d -it -p 8086 tomcat
+  248  docker-machine ls
+  249  docker ps
+  250  docker run --name tomcat02 -d -it -p 8080:8086 tomcat
+  251  docker-machine ls
+  252  docker ps -a
+  253  docker ps 
+  254  docker exec -it tcp://192.168.99.100:2376 //bin/bash
+  255  docker exec -it 8346b6c1d12e //bin/bash
+  256  exit
+  257  #!/bin/bash
+  258  trap '[ "$?" -eq 0 ] || read -p "Looks like something went wrong in step ´$STEP´... Press any key to continue..."' EXIT
+  259  # TODO: I'm sure this is not very robust.  But, it is needed for now to ensure
+  260  # that binaries provided by Docker Toolbox over-ride binaries provided by
+  261  # Docker for Windows when launching using the Quickstart.
+  262  export PATH="/c/Program Files/Docker Toolbox:$PATH"
+  263  VM=${DOCKER_MACHINE_NAME-default}
+  264  DOCKER_MACHINE=./docker-machine.exe
+  265  STEP="Looking for vboxmanage.exe"
+  266  if [ ! -z "$VBOX_MSI_INSTALL_PATH" ]; then   VBOXMANAGE="${VBOX_MSI_INSTALL_PATH}VBoxManage.exe"; else   VBOXMANAGE="${VBOX_INSTALL_PATH}VBoxManage.exe"; fi
+  267  BLUE='\033[1;34m'
+  268  GREEN='\033[0;32m'
+  269  NC='\033[0m'
+  270  #clear all_proxy if not socks address
+  271  if  [[ $ALL_PROXY != socks* ]]; then   unset ALL_PROXY; fi
+  272  if  [[ $all_proxy != socks* ]]; then   unset all_proxy; fi
+  273  if [ ! -f "${DOCKER_MACHINE}" ]; then   echo "Docker Machine is not installed. Please re-run the Toolbox Installer and try again.";   exit 1; fi
+  274  if [ ! -f "${VBOXMANAGE}" ]; then   echo "VirtualBox is not installed. Please re-run the Toolbox Installer and try again.";   exit 1; fi
+  275  "${VBOXMANAGE}" list vms | grep \""${VM}"\" &> /dev/null
+  276  VM_EXISTS_CODE=$?
+  277  set -e
+  278  STEP="Checking if machine $VM exists"
+  279  if [ $VM_EXISTS_CODE -eq 1 ]; then   "${DOCKER_MACHINE}" rm -f "${VM}" &> /dev/null || :;   rm -rf ~/.docker/machine/machines/"${VM}"   if [ "${HTTP_PROXY}" ]; then     PROXY_ENV="$PROXY_ENV --engine-env HTTP_PROXY=$HTTP_PROXY";   fi;   if [ "${HTTPS_PROXY}" ]; then     PROXY_ENV="$PROXY_ENV --engine-env HTTPS_PROXY=$HTTPS_PROXY";   fi;   if [ "${NO_PROXY}" ]; then     PROXY_ENV="$PROXY_ENV --engine-env NO_PROXY=$NO_PROXY";   fi;   "${DOCKER_MACHINE}" create -d virtualbox $PROXY_ENV "${VM}"; fi
+  280  STEP="Checking status on $VM"
+  281  VM_STATUS="$(${DOCKER_MACHINE} status ${VM} 2>&1)"
+  282  if [ "${VM_STATUS}" != "Running" ]; then   "${DOCKER_MACHINE}" start "${VM}";   yes | "${DOCKER_MACHINE}" regenerate-certs "${VM}"; fi
+  283  STEP="Setting env"
+  284  eval "$(${DOCKER_MACHINE} env --shell=bash --no-proxy ${VM})"
+  285  STEP="Finalize"
+  286  clear
+  287  cat << EOF
+  288                          ##         .
+  289                    ## ## ##        ==
+  290                 ## ## ## ## ##    ===
+  291             /"""""""""""""""""\___/ ===
+  292        ~~~ {~~ ~~~~ ~~~ ~~~~ ~~~ ~ /  ===- ~~~
+  293             \______ o           __/
+  294               \    \         __/
+  295                \____\_______/
+  296  EOF
+  297  echo -e "${BLUE}docker${NC} is configured to use the ${GREEN}${VM}${NC} machine with IP ${GREEN}$(${DOCKER_MACHINE} ip ${VM})${NC}"
+  298  echo "For help getting started, check out the docs at https://docs.docker.com"
+  299  echo
+  300  cd
+  301  docker () {   MSYS_NO_PATHCONV=1 docker.exe "$@"; }
+  302  export -f docker
+  303  if [ $# -eq 0 ]; then   echo "Start interactive shell";   exec "$BASH" --login -i; else   echo "Start shell with command";   exec "$BASH" -c "$*"; fi
+  304  ls
+  305  sudo su
+  306  apt-get install elinks
+  307  docker images
+  308  docker run --name tomcat01 -d -it tomcat //bin/bash
+  309  docker ps -a
+  310  docker run --name tomcat03 -d -it tomcat //bin/bash
+  311  docker ps -a
+  312  docker ps 
+  313  docker attach 33c5a194b88f 
+  314  exit
+  315  vagrant up
+  316  vagrant ssh
+  317  vagrant up
+  318  vagrant ssh
+  319  exit
+  320  #!/bin/bash
+  321  trap '[ "$?" -eq 0 ] || read -p "Looks like something went wrong in step ´$STEP´... Press any key to continue..."' EXIT
+  322  # TODO: I'm sure this is not very robust.  But, it is needed for now to ensure
+  323  # that binaries provided by Docker Toolbox over-ride binaries provided by
+  324  # Docker for Windows when launching using the Quickstart.
+  325  export PATH="/c/Program Files/Docker Toolbox:$PATH"
+  326  VM=${DOCKER_MACHINE_NAME-default}
+  327  DOCKER_MACHINE=./docker-machine.exe
+  328  STEP="Looking for vboxmanage.exe"
+  329  if [ ! -z "$VBOX_MSI_INSTALL_PATH" ]; then   VBOXMANAGE="${VBOX_MSI_INSTALL_PATH}VBoxManage.exe"; else   VBOXMANAGE="${VBOX_INSTALL_PATH}VBoxManage.exe"; fi
+  330  BLUE='\033[1;34m'
+  331  GREEN='\033[0;32m'
+  332  NC='\033[0m'
+  333  #clear all_proxy if not socks address
+  334  if  [[ $ALL_PROXY != socks* ]]; then   unset ALL_PROXY; fi
+  335  if  [[ $all_proxy != socks* ]]; then   unset all_proxy; fi
+  336  if [ ! -f "${DOCKER_MACHINE}" ]; then   echo "Docker Machine is not installed. Please re-run the Toolbox Installer and try again.";   exit 1; fi
+  337  if [ ! -f "${VBOXMANAGE}" ]; then   echo "VirtualBox is not installed. Please re-run the Toolbox Installer and try again.";   exit 1; fi
+  338  "${VBOXMANAGE}" list vms | grep \""${VM}"\" &> /dev/null
+  339  VM_EXISTS_CODE=$?
+  340  set -e
+  341  STEP="Checking if machine $VM exists"
+  342  if [ $VM_EXISTS_CODE -eq 1 ]; then   "${DOCKER_MACHINE}" rm -f "${VM}" &> /dev/null || :;   rm -rf ~/.docker/machine/machines/"${VM}"   if [ "${HTTP_PROXY}" ]; then     PROXY_ENV="$PROXY_ENV --engine-env HTTP_PROXY=$HTTP_PROXY";   fi;   if [ "${HTTPS_PROXY}" ]; then     PROXY_ENV="$PROXY_ENV --engine-env HTTPS_PROXY=$HTTPS_PROXY";   fi;   if [ "${NO_PROXY}" ]; then     PROXY_ENV="$PROXY_ENV --engine-env NO_PROXY=$NO_PROXY";   fi;   "${DOCKER_MACHINE}" create -d virtualbox $PROXY_ENV "${VM}"; fi
+  343  STEP="Checking status on $VM"
+  344  VM_STATUS="$(${DOCKER_MACHINE} status ${VM} 2>&1)"
+  345  if [ "${VM_STATUS}" != "Running" ]; then   "${DOCKER_MACHINE}" start "${VM}";   yes | "${DOCKER_MACHINE}" regenerate-certs "${VM}"; fi
+  346  STEP="Setting env"
+  347  eval "$(${DOCKER_MACHINE} env --shell=bash --no-proxy ${VM})"
+  348  STEP="Finalize"
+  349  clear
+  350  cat << EOF
+  351                          ##         .
+  352                    ## ## ##        ==
+  353                 ## ## ## ## ##    ===
+  354             /"""""""""""""""""\___/ ===
+  355        ~~~ {~~ ~~~~ ~~~ ~~~~ ~~~ ~ /  ===- ~~~
+  356             \______ o           __/
+  357               \    \         __/
+  358                \____\_______/
+  359  EOF
+  360  echo -e "${BLUE}docker${NC} is configured to use the ${GREEN}${VM}${NC} machine with IP ${GREEN}$(${DOCKER_MACHINE} ip ${VM})${NC}"
+  361  echo "For help getting started, check out the docs at https://docs.docker.com"
+  362  echo
+  363  cd
+  364  docker () {   MSYS_NO_PATHCONV=1 docker.exe "$@"; }
+  365  export -f docker
+  366  if [ $# -eq 0 ]; then   echo "Start interactive shell";   exec "$BASH" --login -i; else   echo "Start shell with command";   exec "$BASH" -c "$*"; fi
+  367  git config --global user.name "syam_bitbucket"
+  368  git config --global user.email syam.devops@gmail.com
+  369  git clone git clone https://syam_bitbucket@bitbucket.org/syam_bitbucket/game_maven.git
+  370  git clone https://syam_bitbucket@bitbucket.org/syam_bitbucket/game_maven.git
+  371  ls
+  372  cd game_maven/
+  373  ls
+  374  mvn clean package
+  375  mvn clean deploy
+  376  exit
+  377  docker images
+  378  docker pull jenkins
+  379  docker images
+  380  exit
+  381  ls
+  382  git status
+  383  touch reset.txt
+  384  ls
+  385  git status
+  386  git add reset.txt 
+  387  git status
+  388  git reset HEAD reset.txt
+  389  git status
+  390  git add reset.txt 
+  391  git reset HEAD^1
+  392  git status
+  393  git add --all
+  394  git status
+  395  mvn clean
+  396  mvn package
+  397  cat reset.txt 
+  398  vi reset.txt 
+  399  cat reset.txt 
+  400  git add reset.txt 
+  401  git status
+  402  git commit -m "added reset.txt"
+  403  git status
+  404  git pull
+  405  git status
+  406  git commit -m "Added reset.txt"
+  407  git status
+  408  git logs -5
+  409  git logs l -5
+  410  git log l -5
+  411  git log l 5
+  412  git log -l 5
+  413  git status
+  414  git pull 
+  415  git pull 
+  416  git status
+  417  clear
+  418  git status
+  419  git reset
+  420  git status
+  421  git reset HEAD
+  422  git status
+  423  git reset HEAD^
+  424  git status
+  425  git reset --soft 
+  426  git status
+  427  git reset --soft HEAD^1
+  428  git status
+  429  git log -l 5
+  430  git log
+  431  git add -all
+  432  git add --all
+  433  git status
+  434  git reset reset.txt'
+  435  git status
+  436  git reset reset.txt'
+  437  exit
+  438  clear
+  439  git status
+  440  git reset reset.txt
+  441  git status
+  442  git commit -m "Removed reset.txt"
+  443  git status
+  444  git rm reset.txt 
+  445  git -rm reset.txt 
+  446  git -rm reset.txt 
+  447  git rm reset.txt 
+  448  git status
+  449  git remove reset.txt
+  450  git rm -rf reset.txt
+  451  ls
+  452  rm reset.txt 
+  453  git status
+  454  git push 
+  455  git pull
+  456  git push 
+  457  git status
+  458  git status
+  459  ls
+  460  git log
+  461  clear
+  462  git status
+  463  git log
+  464  git revert HEAD^1
+  465  git status
+  466  git log
+  467  git status
+  468  git status
+  469  git push
+  470  git log
+  471  lear
+  472  clear
+  473  git status
+  474  git blame
+  475  git blame pom.xml
+  476  lean
+  477  clean
+  478  clean
+  479  clear
+  480  ls
+  481  git blame finalversion.txt
+  482  git blame gversion.txt
+  483  git blame release.properties
+  484  git blame target/
+  485  git blame
+  486  git blame -l
+  487  git blame -l pom.xml
+  488  touch delete.txt
+  489  git status
+  490  git add delete.txt 
+  491  git commit -m "delete file is added"
+  492  git status
+  493  git rm -rf delete.txt 
+  494  git status
+  495  git reset HEAD delete.txt
+  496  git status
+  497  ls
+  498  git checkout delete.txt
+  499  ls
+  500  git status
+  501  git status
+  502  ls
+  503  history > history.txt
