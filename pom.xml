@@ -30,7 +30,7 @@
         <url>scm:git:https://syam_bitbucket@bitbucket.org/syam_bitbucket/game_maven.git</url>
     </scm>
 	
-	<!-- This section is used for upload artifacts to releases and snapshot repositries  ######  BY SHYAM  ######  -->
+	<!-- This section is used for upload artifacts to remote release/snapshot repositries  ######  BY SHYAM  ######  -->
 	<distributionManagement>
 		 <repository>
 			<id>releases</id>
