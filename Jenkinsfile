@@ -9,7 +9,7 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Clean Build'
-                bat 'sh clean install'
+                sh 'mvn clean install'
             }
 		post {
         always {
@@ -26,7 +26,7 @@ pipeline {
                 echo 'Sonar Scanner'
               // 	def scannerHome = tool 'sonar-scanner-3.0.3'
 			                withSonarQubeEnv('SonarQube') {
-                    bat 'C:/sonar-scanner-3.0.3/bin/sonar-scanner'
+                    sh 'C:/sonar-scanner-3.0.3/bin/sonar-scanner'
 			    }
             }
         }
