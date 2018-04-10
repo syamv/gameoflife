@@ -9,6 +9,7 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Clean Build'
+		tool name: 'maven-3.0.5', type: 'maven'
                 sh 'mvn clean install'
             }
 		post {
