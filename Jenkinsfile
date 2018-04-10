@@ -1,5 +1,8 @@
 pipeline {
   agent any
+stage('Configure') {
+    env.PATH = "${tool 'maven-3.0.5'}/bin:${env.PATH}"
+  }
     stages {
         stage('Checkout') {
             steps {
@@ -9,15 +12,15 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Clean Build'
-		tool name: 'maven-3.0.5', type: 'maven'
+		//tool name: 'maven-3.0.5', type: 'maven'
                 sh 'mvn clean install'
             }
 		post {
         always {
             archive "target/**/*"
             junit 'target/surefire-reports/*.xml'
-		  jacoco(execPattern: 'target/jacoco.exec')
-        }
+	    jacoco(execPattern: 'target/jacoco.exec')
+	    }
     }
         }
 	    
